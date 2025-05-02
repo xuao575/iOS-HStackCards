@@ -73,22 +73,32 @@ final class CompositionalController: UICollectionViewController {
     // 布局：80% 宽度、200pt 高度、水平分页正交滚动
     private static func createLayout() -> UICollectionViewCompositionalLayout {
         .init { _, _ -> NSCollectionLayoutSection? in
+            // 1. Item 占满整个组
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0),
                 heightDimension: .fractionalHeight(1.0)
             )
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
+            // 2. 组大小改成 150×150 的正方形
+            let sideLength: CGFloat = 250
             let groupSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(0.8),
-                heightDimension: .absolute(200)
+                widthDimension: .absolute(sideLength),
+                heightDimension: .absolute(sideLength)
             )
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+            let group = NSCollectionLayoutGroup.horizontal(
+                layoutSize: groupSize,
+                subitems: [item]
+            )
+            // 卡片之间仍保留 16pt 间距
             group.interItemSpacing = .fixed(16)
 
+            // 3. 水平分页滚动（吸附效果）和左右内边距
             let section = NSCollectionLayoutSection(group: group)
             section.orthogonalScrollingBehavior = .groupPaging
-            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
+            section.contentInsets = NSDirectionalEdgeInsets(
+                top: 0, leading: 16, bottom: 0, trailing: 16
+            )
             return section
         }
     }
