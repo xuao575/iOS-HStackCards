@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		979DE76F2DC4C7AC009D2F28 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 979DE76E2DC4C7A5009D2F28 /* README.md */; };
+		979DE7712DC4C7DF009D2F28 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 979DE7702DC4C7D5009D2F28 /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		979DE6792DC48D0F009D2F28 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,22 +32,14 @@
 		979DE6672DC48D0C009D2F28 /* HStackCardsTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HStackCardsTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		979DE6782DC48D0F009D2F28 /* HStackCardsTestTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HStackCardsTestTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		979DE6822DC48D0F009D2F28 /* HStackCardsTestUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HStackCardsTestUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		979DE76E2DC4C7A5009D2F28 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		979DE7702DC4C7D5009D2F28 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		979DE6692DC48D0C009D2F28 /* HStackCardsTest */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = HStackCardsTest;
-			sourceTree = "<group>";
-		};
-		979DE67B2DC48D0F009D2F28 /* HStackCardsTestTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = HStackCardsTestTests;
-			sourceTree = "<group>";
-		};
-		979DE6852DC48D0F009D2F28 /* HStackCardsTestUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = HStackCardsTestUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,9 +72,9 @@
 		979DE65E2DC48D0C009D2F28 = {
 			isa = PBXGroup;
 			children = (
+				979DE7702DC4C7D5009D2F28 /* .gitignore */,
+				979DE76E2DC4C7A5009D2F28 /* README.md */,
 				979DE6692DC48D0C009D2F28 /* HStackCardsTest */,
-				979DE67B2DC48D0F009D2F28 /* HStackCardsTestTests */,
-				979DE6852DC48D0F009D2F28 /* HStackCardsTestUITests */,
 				979DE6682DC48D0C009D2F28 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -130,9 +127,6 @@
 			dependencies = (
 				979DE67A2DC48D0F009D2F28 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				979DE67B2DC48D0F009D2F28 /* HStackCardsTestTests */,
-			);
 			name = HStackCardsTestTests;
 			packageProductDependencies = (
 			);
@@ -152,9 +146,6 @@
 			);
 			dependencies = (
 				979DE6842DC48D0F009D2F28 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				979DE6852DC48D0F009D2F28 /* HStackCardsTestUITests */,
 			);
 			name = HStackCardsTestUITests;
 			packageProductDependencies = (
@@ -212,6 +203,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				979DE7712DC4C7DF009D2F28 /* .gitignore in Resources */,
+				979DE76F2DC4C7AC009D2F28 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

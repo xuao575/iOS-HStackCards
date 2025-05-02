@@ -1,0 +1,37 @@
+# macOS 系统文件
+
+.DS\_Store
+.AppleDouble
+.LSOverride
+
+# Icon 文件（必须以回车结尾）
+
+Icon?
+
+# 资源派生文件
+
+.\_\*
+
+# Spotlight 索引
+
+.Spotlight-V100
+
+# Time Machine 及文件版本记录
+
+.DocumentRevisions-V100
+.fseventsd
+.metadata\_never\_index
+
+# 临时文件与回收站
+
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# 远程共享目录
+
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+
