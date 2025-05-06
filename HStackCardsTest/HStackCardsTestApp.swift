@@ -1,7 +1,6 @@
-
 //
 //  AppsCompositionalView.swift
-//  App Store Style Snap-Scrolling Cards
+//  App Store Style Snap-Scrolling Cards with NavigationStack Preview
 //
 //  整个逻辑和入口都放在一个文件里，包含 @main
 //
@@ -15,7 +14,7 @@ struct LinkCardItem: Identifiable, Hashable {
     let title: String
 }
 
-// MARK: - SwiftUI 卡片视图
+// MARK: - 卡片视图
 struct HighlightSquareView: View {
     let title: String
     var body: some View {
@@ -31,37 +30,61 @@ struct HighlightSquareView: View {
     }
 }
 
+// MARK: - 预览详情页
+struct CardPreviewView: View {
+    let title: String
+    @Namespace private var dummyNamespace  // 只为兼容 iOS < 18
+
+    var body: some View {
+        VStack(spacing: 20) {
+            HighlightSquareView(title: title)
+                .frame(width: 300, height: 300)
+            Text("这是 “\(title)” 的预览页面")
+                .font(.title2)
+            Spacer()
+        }
+        .padding()
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
 // MARK: - UIKit + Compositional Layout 控制器
 final class CompositionalController: UICollectionViewController {
     private let cellID = "linkCardCell"
     private var items: [LinkCardItem]
+    private let namespace: Namespace.ID
+    /// 点击回调
+    var onSelect: ((LinkCardItem) -> Void)?
 
-    // Diffable Data Source
-    private lazy var dataSource: UICollectionViewDiffableDataSource<Int, LinkCardItem> = {
-        UICollectionViewDiffableDataSource<Int, LinkCardItem>(collectionView: collectionView) { cv, ip, item in
-            let cell = cv.dequeueReusableCell(withReuseIdentifier: self.cellID, for: ip)
-            cell.contentConfiguration = UIHostingConfiguration {
-                HighlightSquareView(title: item.title)
-            }
-            return cell
-        }
-    }()
-
-    // 构造器传入数据
-    init(items: [LinkCardItem]) {
+    init(items: [LinkCardItem], namespace: Namespace.ID) {
         self.items = items
+        self.namespace = namespace
         let layout = CompositionalController.createLayout()
         super.init(collectionViewLayout: layout)
     }
-
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.backgroundColor = .systemBackground
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellID)
+        collectionView.delegate = self
         applySnapshot()
     }
+
+    private lazy var dataSource: UICollectionViewDiffableDataSource<Int, LinkCardItem> = {
+        UICollectionViewDiffableDataSource<Int, LinkCardItem>(collectionView: collectionView) { [weak self] cv, ip, item in
+            guard let self = self else { return UICollectionViewCell() }
+            let cell = cv.dequeueReusableCell(withReuseIdentifier: self.cellID, for: ip)
+            // 使用 UIHostingConfiguration 嵌入 SwiftUI，并打上 matchedTransitionSource
+            cell.contentConfiguration = UIHostingConfiguration {
+                HighlightSquareView(title: item.title)
+                    .matchedTransitionSource(id: item.id, in: self.namespace)
+            }
+            return cell
+        }
+    }()
 
     private func applySnapshot() {
         var snap = NSDiffableDataSourceSnapshot<Int, LinkCardItem>()
@@ -70,30 +93,31 @@ final class CompositionalController: UICollectionViewController {
         dataSource.apply(snap, animatingDifferences: false)
     }
 
-    // 布局：80% 宽度、200pt 高度、水平分页正交滚动
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let item = items[indexPath.item]
+        onSelect?(item)
+    }
+
+    /// Compositional Layout：250×250 正方形、水平分页吸附
     private static func createLayout() -> UICollectionViewCompositionalLayout {
-        .init { _, _ -> NSCollectionLayoutSection? in
-            // 1. Item 占满整个组
+        .init { _, _ in
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0),
                 heightDimension: .fractionalHeight(1.0)
             )
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-            // 2. 组大小改成 150×150 的正方形
-            let sideLength: CGFloat = 250
+            let side: CGFloat = 250
             let groupSize = NSCollectionLayoutSize(
-                widthDimension: .absolute(sideLength),
-                heightDimension: .absolute(sideLength)
+                widthDimension: .absolute(side),
+                heightDimension: .absolute(side)
             )
             let group = NSCollectionLayoutGroup.horizontal(
                 layoutSize: groupSize,
                 subitems: [item]
             )
-            // 卡片之间仍保留 16pt 间距
             group.interItemSpacing = .fixed(16)
 
-            // 3. 水平分页滚动（吸附效果）和左右内边距
             let section = NSCollectionLayoutSection(group: group)
             section.orthogonalScrollingBehavior = .groupPaging
             section.contentInsets = NSDirectionalEdgeInsets(
@@ -104,29 +128,66 @@ final class CompositionalController: UICollectionViewController {
     }
 }
 
-// MARK: - SwiftUI 封装
-struct AppsCompositionalView: UIViewControllerRepresentable {
+// MARK: - Representable 包装
+struct CompositionalUIView: UIViewControllerRepresentable {
     let items: [LinkCardItem]
+    let namespace: Namespace.ID
+    let onSelect: (LinkCardItem) -> Void
 
-    func makeUIViewController(context: Context) -> UIViewController {
-        UINavigationController(rootViewController: CompositionalController(items: items))
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeUIViewController(context: Context) -> CompositionalController {
+        let vc = CompositionalController(items: items, namespace: namespace)
+        vc.onSelect = { item in context.coordinator.parent.onSelect(item) }
+        return vc
     }
 
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: CompositionalController, context: Context) {}
+
+    class Coordinator {
+        let parent: CompositionalUIView
+        init(_ parent: CompositionalUIView) { self.parent = parent }
+    }
+}
+
+// MARK: - SwiftUI 主视图 + NavigationStack
+struct AppsCompositionalView: View {
+    @Namespace private var transitionAnimation
+    @State private var path: [LinkCardItem] = []
+
+    private let sampleItems: [LinkCardItem] = (1...10).map {
+        LinkCardItem(title: "Card \($0)")
+    }
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            CompositionalUIView(
+                items: sampleItems,
+                namespace: transitionAnimation
+            ) { selected in
+                path.append(selected)
+            }
+            .navigationTitle("卡片列表")
+            .navigationDestination(for: LinkCardItem.self) { item in
+                if #available(iOS 18.0, *) {
+                    CardPreviewView(title: item.title)
+                        .navigationTransition(
+                            .zoom(sourceID: item.id, in: transitionAnimation)
+                        )
+                } else {
+                    CardPreviewView(title: item.title)
+                }
+            }
+        }
+    }
 }
 
 // MARK: - App 入口
 @main
 struct HStackCardsTestApp: App {
-    // 示例数据：10 个标题卡片
-    private let sampleItems: [LinkCardItem] = (1...10).map {
-        LinkCardItem(title: "Card \($0)")
-    }
-
     var body: some Scene {
         WindowGroup {
-            AppsCompositionalView(items: sampleItems)
-                .edgesIgnoringSafeArea(.all)
+            AppsCompositionalView()
         }
     }
 }
