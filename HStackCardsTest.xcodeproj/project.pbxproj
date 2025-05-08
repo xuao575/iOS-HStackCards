@@ -36,9 +36,22 @@
 		979DE7702DC4C7D5009D2F28 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		974986122DCD2C46007A8173 /* Exceptions for "HStackCardsTest" folder in "Copy Bundle Resources" phase from "HStackCardsTest" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 979DE6652DC48D0C009D2F28 /* Resources */;
+			membershipExceptions = (
+				Plate/samplePapers.swift,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		979DE6692DC48D0C009D2F28 /* HStackCardsTest */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				974986122DCD2C46007A8173 /* Exceptions for "HStackCardsTest" folder in "Copy Bundle Resources" phase from "HStackCardsTest" target */,
+			);
 			path = HStackCardsTest;
 			sourceTree = "<group>";
 		};

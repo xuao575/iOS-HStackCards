@@ -1,15 +1,18 @@
 import SwiftUI
 
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        stride(from: 0, to: count, by: size).map {
+            Array(self[$0..<Swift.min($0 + size, count)])
+        }
+    }
+}
+
 @main
 struct PlateCarouselApp: App {
-    // 示例占位数据
-    private let plates: [PlateItem] = (1...10).map { idx in
-        PlateItem(papers: [
-            Paper(title: "论文标题 \(idx).1", author: "作者 A\(idx)"),
-            Paper(title: "论文标题 \(idx).2", author: "作者 B\(idx)"),
-            Paper(title: "论文标题 \(idx).3", author: "作者 C\(idx)")
-        ])
-    }
+    private let plates: [PlateItem] = samplePapers
+        .chunked(into: 3)
+        .map { PlateItem(papers: $0) }
 
     var body: some Scene {
         WindowGroup {
