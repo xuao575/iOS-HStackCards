@@ -83,7 +83,7 @@ public final class PlateCarouselViewController: UICollectionViewController {
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             let groupSize = NSCollectionLayoutSize(
                 widthDimension: .absolute(300),
-                heightDimension: .absolute(250)
+                heightDimension: .estimated(400)           // ← 用估算值（比你预期的内容略大即可）
             )
             let group = NSCollectionLayoutGroup.horizontal(
                 layoutSize: groupSize, subitems: [item]
