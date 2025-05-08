@@ -10,9 +10,11 @@ public struct PlateCarouselView: UIViewControllerRepresentable {
     }
 
     public func makeUIViewController(context: Context) -> UIViewController {
-        UINavigationController(
-            rootViewController: PlateCarouselViewController(plateItems: plateItems)
-        )
+        let plateVC = PlateCarouselViewController(plateItems: plateItems)
+        let nav = UINavigationController(rootViewController: plateVC)
+        // ← 在这里隐藏它自带的导航栏
+        nav.setNavigationBarHidden(true, animated: false)
+        return nav
     }
 
     public func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}

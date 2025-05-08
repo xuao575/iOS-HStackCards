@@ -17,6 +17,7 @@ struct PlateCarouselApp: App {
     var body: some Scene {
         WindowGroup {
             PlateCarouselView(plateItems: plates)
+                .frame(height: 400)      // ← 这里给一个合适的高度
         }
     }
 }
