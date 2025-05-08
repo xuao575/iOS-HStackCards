@@ -1,11 +1,3 @@
-
-//
-//  AppsCompositionalView.swift
-//  App Store Style Snap-Scrolling Cards
-//
-//  整个逻辑和入口都放在一个文件里，包含 @main
-//
-
 import SwiftUI
 import UIKit
 
@@ -13,6 +5,20 @@ import UIKit
 struct LinkCardItem: Identifiable, Hashable {
     let id = UUID()
     let title: String
+}
+
+// MARK: - SwiftUI 详情页
+struct DetailView: View {
+    let title: String
+    var body: some View {
+        VStack {
+            Text("这是 \(title) 的详情页")
+                .font(.largeTitle)
+                .padding()
+            Spacer()
+        }
+        .navigationTitle(title)
+    }
 }
 
 // MARK: - SwiftUI 卡片视图
@@ -61,6 +67,8 @@ final class CompositionalController: UICollectionViewController {
         collectionView.backgroundColor = .systemBackground
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellID)
         applySnapshot()
+        // 确保自己成为 delegate
+        collectionView.delegate = self
     }
 
     private func applySnapshot() {
@@ -70,17 +78,24 @@ final class CompositionalController: UICollectionViewController {
         dataSource.apply(snap, animatingDifferences: false)
     }
 
+    // MARK: —— 点击处理 ——
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let item = items[indexPath.item]
+        // 用 SwiftUI 的 DetailView 包装成 UIViewController
+        let detailVC = UIHostingController(rootView: DetailView(title: item.title))
+        detailVC.title = item.title
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
+
     // 布局：80% 宽度、200pt 高度、水平分页正交滚动
     private static func createLayout() -> UICollectionViewCompositionalLayout {
         .init { _, _ -> NSCollectionLayoutSection? in
-            // 1. Item 占满整个组
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0),
                 heightDimension: .fractionalHeight(1.0)
             )
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-            // 2. 组大小改成 150×150 的正方形
             let sideLength: CGFloat = 250
             let groupSize = NSCollectionLayoutSize(
                 widthDimension: .absolute(sideLength),
@@ -90,10 +105,8 @@ final class CompositionalController: UICollectionViewController {
                 layoutSize: groupSize,
                 subitems: [item]
             )
-            // 卡片之间仍保留 16pt 间距
             group.interItemSpacing = .fixed(16)
 
-            // 3. 水平分页滚动（吸附效果）和左右内边距
             let section = NSCollectionLayoutSection(group: group)
             section.orthogonalScrollingBehavior = .groupPaging
             section.contentInsets = NSDirectionalEdgeInsets(
@@ -109,6 +122,7 @@ struct AppsCompositionalView: UIViewControllerRepresentable {
     let items: [LinkCardItem]
 
     func makeUIViewController(context: Context) -> UIViewController {
+        // 注意已经在这里创建了 UINavigationController
         UINavigationController(rootViewController: CompositionalController(items: items))
     }
 
@@ -118,7 +132,6 @@ struct AppsCompositionalView: UIViewControllerRepresentable {
 // MARK: - App 入口
 @main
 struct HStackCardsTestApp: App {
-    // 示例数据：10 个标题卡片
     private let sampleItems: [LinkCardItem] = (1...10).map {
         LinkCardItem(title: "Card \($0)")
     }
