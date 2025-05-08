@@ -17,16 +17,18 @@ public struct PaperRowView: View {
                 Text(paper.title)
                     .font(.headline)
                     .foregroundColor(.primary)
-                    .lineLimit(4)
+                    .lineLimit(3)
                     .truncationMode(.middle)
 
                 // 下方作者：最多 3 行
                 Text(paper.author)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                    .lineLimit(3)
+                    .lineLimit(2)
             }
-            .padding(.vertical, 8)
+            .frame(height: 120)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
         }
         .buttonStyle(.plain)
     }

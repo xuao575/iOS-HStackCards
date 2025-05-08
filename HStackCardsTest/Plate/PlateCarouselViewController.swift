@@ -28,15 +28,10 @@ public final class PlateCarouselViewController: UICollectionViewController {
             forCellWithReuseIdentifier: cellIdentifier
         )
 
-        // 1. 保留左偏移
-        let inset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
-        collectionView.contentInset = inset
-        collectionView.scrollIndicatorInsets = inset
-
         // —— 新增两行 ——
         // 2. 禁用系统自动 SafeArea inset（否则会往上下塞额外 inset）
         if #available(iOS 11.0, *) {
-            collectionView.contentInsetAdjustmentBehavior = .never
+            collectionView.contentInsetAdjustmentBehavior =  .automatic
         }
         // 3. 只允许横向弹性，不让竖向滚动/弹性
         collectionView.alwaysBounceVertical = false

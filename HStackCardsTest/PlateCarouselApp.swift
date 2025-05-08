@@ -17,7 +17,6 @@ struct PlateCarouselApp: App {
     var body: some Scene {
         WindowGroup {
             PlateCarouselView(plateItems: plates)
-                .edgesIgnoringSafeArea(.all)
         }
     }
 }
