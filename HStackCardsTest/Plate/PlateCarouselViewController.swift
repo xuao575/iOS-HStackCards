@@ -91,8 +91,9 @@ public final class PlateCarouselViewController: UICollectionViewController {
             group.interItemSpacing = .fixed(16)
             let section = NSCollectionLayoutSection(group: group)
             section.orthogonalScrollingBehavior = .groupPaging
+            // 修改卡片偏移
             section.contentInsets = NSDirectionalEdgeInsets(
-                top: 16, leading: 16, bottom: 16, trailing: 16
+                top: 16, leading: 32, bottom: 16, trailing: 16
             )
             return section
         }
