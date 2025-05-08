@@ -2,14 +2,15 @@ import SwiftUI
 import UIKit
 
 // MARK: - 数据模型
-struct LinkCardItem: Identifiable, Hashable {
+struct PlateItem: Identifiable, Hashable {
     let id = UUID()
     let title: String
 }
 
 // MARK: - SwiftUI 详情页
-struct DetailView: View {
+struct PlateDetailView: View {
     let title: String
+
     var body: some View {
         VStack {
             Text("这是 \(title) 的详情页")
@@ -22,8 +23,9 @@ struct DetailView: View {
 }
 
 // MARK: - SwiftUI 卡片视图
-struct HighlightSquareView: View {
+struct PlateItemView: View {
     let title: String
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12)
@@ -37,26 +39,23 @@ struct HighlightSquareView: View {
     }
 }
 
-// MARK: - UIKit + Compositional Layout 控制器
-final class CompositionalController: UICollectionViewController {
-    private let cellID = "linkCardCell"
-    private var items: [LinkCardItem]
+// MARK: - UICollectionViewController（卡片走马灯）
+final class PlateCarouselViewController: UICollectionViewController {
+    private let cellIdentifier = "PlateCell"
+    private var PlateItems: [PlateItem]
 
     // Diffable Data Source
-    private lazy var dataSource: UICollectionViewDiffableDataSource<Int, LinkCardItem> = {
-        UICollectionViewDiffableDataSource<Int, LinkCardItem>(collectionView: collectionView) { cv, ip, item in
-            let cell = cv.dequeueReusableCell(withReuseIdentifier: self.cellID, for: ip)
-            cell.contentConfiguration = UIHostingConfiguration {
-                HighlightSquareView(title: item.title)
-            }
-            return cell
+    private lazy var dataSource = UICollectionViewDiffableDataSource<Int, PlateItem>(collectionView: collectionView) { cv, ip, Plate in
+        let cell = cv.dequeueReusableCell(withReuseIdentifier: self.cellIdentifier, for: ip)
+        cell.contentConfiguration = UIHostingConfiguration {
+            PlateItemView(title: Plate.title)
         }
-    }()
+        return cell
+    }
 
-    // 构造器传入数据
-    init(items: [LinkCardItem]) {
-        self.items = items
-        let layout = CompositionalController.createLayout()
+    init(PlateItems: [PlateItem]) {
+        self.PlateItems = PlateItems
+        let layout = PlateCarouselViewController.createLayout()
         super.init(collectionViewLayout: layout)
     }
 
@@ -65,65 +64,56 @@ final class CompositionalController: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.backgroundColor = .systemBackground
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellID)
-        applySnapshot()
-        // 确保自己成为 delegate
+        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellIdentifier)
         collectionView.delegate = self
+        applySnapshot()
     }
 
     private func applySnapshot() {
-        var snap = NSDiffableDataSourceSnapshot<Int, LinkCardItem>()
-        snap.appendSections([0])
-        snap.appendItems(items)
-        dataSource.apply(snap, animatingDifferences: false)
+        var snapshot = NSDiffableDataSourceSnapshot<Int, PlateItem>()
+        snapshot.appendSections([0])
+        snapshot.appendItems(PlateItems)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
 
-    // MARK: —— 点击处理 ——
+    // MARK: —— 点击跳转 ——
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let item = items[indexPath.item]
-        // 用 SwiftUI 的 DetailView 包装成 UIViewController
-        let detailVC = UIHostingController(rootView: DetailView(title: item.title))
-        detailVC.title = item.title
+        let selected = PlateItems[indexPath.item]
+        let detailVC = UIHostingController(rootView: PlateDetailView(title: selected.title))
+        detailVC.title = selected.title
         navigationController?.pushViewController(detailVC, animated: true)
     }
 
-    // 布局：80% 宽度、200pt 高度、水平分页正交滚动
+    // 布局：250pt×250pt 卡片、16pt 间距、水平分页正交滚动
     private static func createLayout() -> UICollectionViewCompositionalLayout {
-        .init { _, _ -> NSCollectionLayoutSection? in
+        UICollectionViewCompositionalLayout { _, _ in
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0),
                 heightDimension: .fractionalHeight(1.0)
             )
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-            let sideLength: CGFloat = 250
             let groupSize = NSCollectionLayoutSize(
-                widthDimension: .absolute(sideLength),
-                heightDimension: .absolute(sideLength)
+                widthDimension: .absolute(250),
+                heightDimension: .absolute(250)
             )
-            let group = NSCollectionLayoutGroup.horizontal(
-                layoutSize: groupSize,
-                subitems: [item]
-            )
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
             group.interItemSpacing = .fixed(16)
 
             let section = NSCollectionLayoutSection(group: group)
             section.orthogonalScrollingBehavior = .groupPaging
-            section.contentInsets = NSDirectionalEdgeInsets(
-                top: 0, leading: 16, bottom: 0, trailing: 16
-            )
+            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
             return section
         }
     }
 }
 
 // MARK: - SwiftUI 封装
-struct AppsCompositionalView: UIViewControllerRepresentable {
-    let items: [LinkCardItem]
+struct PlateCarouselView: UIViewControllerRepresentable {
+    let PlateItems: [PlateItem]
 
     func makeUIViewController(context: Context) -> UIViewController {
-        // 注意已经在这里创建了 UINavigationController
-        UINavigationController(rootViewController: CompositionalController(items: items))
+        UINavigationController(rootViewController: PlateCarouselViewController(PlateItems: PlateItems))
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
@@ -131,14 +121,12 @@ struct AppsCompositionalView: UIViewControllerRepresentable {
 
 // MARK: - App 入口
 @main
-struct HStackCardsTestApp: App {
-    private let sampleItems: [LinkCardItem] = (1...10).map {
-        LinkCardItem(title: "Card \($0)")
-    }
+struct PlateCarouselApp: App {
+    private let Plates = (1...10).map { PlateItem(title: "Plate \($0)") }
 
     var body: some Scene {
         WindowGroup {
-            AppsCompositionalView(items: sampleItems)
+            PlateCarouselView(PlateItems: Plates)
                 .edgesIgnoringSafeArea(.all)
         }
     }
